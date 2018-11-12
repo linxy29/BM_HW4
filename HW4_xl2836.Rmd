@@ -143,20 +143,47 @@ reg_Heart =
   HeartDisease_df %>% 
   mutate(log_totalcost = log(totalcost)) %>% 
   filter(is.finite(log_totalcost)) %>% 
-  lm(formula = ERvisits ~ log_totalcost, data = .)
+  lm(formula = log_totalcost ~ ERvisits, data = .) 
 
 reg_Heart
-```
 
-```{r}
+reg_Heart %>% 
+  broom::tidy()
+
 summary(reg_Heart)
 ```
 
-According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 and p-value is lower than 2.2e-16, so this is not a proper model to describe data and we should use other model.
+```{r}
+  HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  filter(is.finite(log_totalcost)) %>% 
+  lm(formula = log_totalcost ~ ERvisits, data = .) %>% 
+  broom::tidy()
+```
+
+According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 which means this simple linear model is not a proper model. However, p-value is lower than 2.2e-16, which means the slope is significant and there are positive relationship between log of total cost and number of emergency room visits.
 
 Interpretation: The slop of model is 0.452 which means if the log of total cost increases by 1 unit, the number of emergency room vistis will increase 0.452 times.
 
 ## Question 5
+
+Test if `comp_bin` is an effect modifier
+
+```{r}
+reg_modifier_Heart = 
+  HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  filter(is.finite(log_totalcost)) %>% 
+  lm(formula = log_totalcost ~ ERvisits + comp_bin + ERvisits*comp_bin, data = .) 
+
+reg_modifier_Heart %>% 
+  broom::tidy()
+
+reg_modifier_Heart
+
+summary(reg_modifier_Heart)
+```
+
 
 # Problem 3
 

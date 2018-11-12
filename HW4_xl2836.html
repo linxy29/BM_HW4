@@ -280,40 +280,106 @@ head(HeartDisease_df)</code></pre>
   HeartDisease_df %&gt;% 
   mutate(log_totalcost = log(totalcost)) %&gt;% 
   filter(is.finite(log_totalcost)) %&gt;% 
-  lm(formula = ERvisits ~ log_totalcost, data = .)
+  lm(formula = log_totalcost ~ ERvisits, data = .) 
 
 reg_Heart</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = ERvisits ~ log_totalcost, data = .)
+## lm(formula = log_totalcost ~ ERvisits, data = .)
 ## 
 ## Coefficients:
-##   (Intercept)  log_totalcost  
-##        0.5675         0.4524</code></pre>
+## (Intercept)     ERvisits  
+##      5.5377       0.2267</code></pre>
+<pre class="r"><code>reg_Heart %&gt;% 
+  broom::tidy()</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)    5.54     0.104      53.4  1.89e-263
+## 2 ERvisits       0.227    0.0240      9.46 3.49e- 20</code></pre>
 <pre class="r"><code>summary(reg_Heart)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = ERvisits ~ log_totalcost, data = .)
+## lm(formula = log_totalcost ~ ERvisits, data = .)
 ## 
 ## Residuals:
 ##     Min      1Q  Median      3Q     Max 
-## -4.7681 -1.6841 -0.4276  1.0501 15.8250 
+## -6.2013 -1.1265  0.0191  1.2668  4.2797 
 ## 
 ## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)    0.56755    0.31491   1.802   0.0719 .  
-## log_totalcost  0.45243    0.04782   9.460   &lt;2e-16 ***
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  5.53771    0.10362   53.44   &lt;2e-16 ***
+## ERvisits     0.22672    0.02397    9.46   &lt;2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
-## Residual standard error: 2.504 on 783 degrees of freedom
+## Residual standard error: 1.772 on 783 degrees of freedom
 ## Multiple R-squared:  0.1026, Adjusted R-squared:  0.1014 
 ## F-statistic:  89.5 on 1 and 783 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 and p-value is lower than 2.2e-16, so this is not a proper model to describe data and we should use other model.</p>
+<pre class="r"><code>  HeartDisease_df %&gt;% 
+  mutate(log_totalcost = log(totalcost)) %&gt;% 
+  filter(is.finite(log_totalcost)) %&gt;% 
+  lm(formula = log_totalcost ~ ERvisits, data = .) %&gt;% 
+  broom::tidy()</code></pre>
+<pre><code>## # A tibble: 2 x 5
+##   term        estimate std.error statistic   p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)    5.54     0.104      53.4  1.89e-263
+## 2 ERvisits       0.227    0.0240      9.46 3.49e- 20</code></pre>
+<p>According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 which means this simple linear model is not a proper model. However, p-value is lower than 2.2e-16, which means the slope is significant and there are positive relationship between log of total cost and number of emergency room visits.</p>
 <p>Interpretation: The slop of model is 0.452 which means if the log of total cost increases by 1 unit, the number of emergency room vistis will increase 0.452 times.</p>
 </div>
 <div id="question-5" class="section level2">
 <h2>Question 5</h2>
+<p>Test if <code>comp_bin</code> is an effect modifier</p>
+<pre class="r"><code>reg_modifier_Heart = 
+  HeartDisease_df %&gt;% 
+  mutate(log_totalcost = log(totalcost)) %&gt;% 
+  filter(is.finite(log_totalcost)) %&gt;% 
+  lm(formula = log_totalcost ~ ERvisits + comp_bin + ERvisits*comp_bin, data = .) 
+
+reg_modifier_Heart %&gt;% 
+  broom::tidy()</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   term              estimate std.error statistic   p.value
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 (Intercept)         5.50      0.103      53.1  1.36e-261
+## 2 ERvisits            0.211     0.0245      8.61 3.99e- 17
+## 3 comp_bin            2.18      0.546       3.99 7.17e-  5
+## 4 ERvisits:comp_bin  -0.0993    0.0948     -1.05 2.96e-  1</code></pre>
+<pre class="r"><code>reg_modifier_Heart</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_totalcost ~ ERvisits + comp_bin + ERvisits * 
+##     comp_bin, data = .)
+## 
+## Coefficients:
+##       (Intercept)           ERvisits           comp_bin  
+##           5.49899            0.21125            2.17969  
+## ERvisits:comp_bin  
+##          -0.09927</code></pre>
+<pre class="r"><code>summary(reg_modifier_Heart)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_totalcost ~ ERvisits + comp_bin + ERvisits * 
+##     comp_bin, data = .)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -6.0852 -1.0802 -0.0078  1.1898  4.3803 
+## 
+## Coefficients:
+##                   Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        5.49899    0.10349  53.138  &lt; 2e-16 ***
+## ERvisits           0.21125    0.02453   8.610  &lt; 2e-16 ***
+## comp_bin           2.17969    0.54604   3.992 7.17e-05 ***
+## ERvisits:comp_bin -0.09927    0.09483  -1.047    0.296    
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 1.732 on 781 degrees of freedom
+## Multiple R-squared:  0.1449, Adjusted R-squared:  0.1417 
+## F-statistic: 44.13 on 3 and 781 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <div id="problem-3" class="section level1">
