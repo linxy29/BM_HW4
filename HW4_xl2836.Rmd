@@ -1,0 +1,196 @@
+---
+title: "Homework 4"
+author: "Xinyi Lin"
+date: "11/9/2018"
+output: html_document
+---
+# Problem 1
+
+# Question 2
+
+As 
+
+```{r}
+library(tidyverse)
+library(patchwork)
+```
+
+# Problem 2
+
+First, we need to import data
+
+```{r}
+HeartDisease_df = read_csv("./data/HeartDisease.csv") 
+
+head(HeartDisease_df)
+```
+
+## Question 1
+
+This dataset includes `r nrow(HeartDisease_df)` observations and `r ncol(HeartDisease_df)` variables. Among variables, main outcome is `totalcost` and main predictor is `ERvisits`. 
+
+Then, we show descriptive statistics for all variables of interest.
+
+```{r}
+mean_and_sd = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Argument x should be numeric")
+  } else if (length(x) == 1) {
+    stop("Cannot be computed for length 1 vectors")
+  }
+  
+  mean_x = mean(x)
+  sd_x = sd(x)
+
+  list(mean = mean_x, 
+       sd = sd_x)
+}
+```
+
+`totalcost`
+
+```{r}
+mean_and_sd(HeartDisease_df$totalcost)
+```
+
+`ERvisits`
+
+```{r}
+mean_and_sd(HeartDisease_df$ERvisits)
+```
+
+`age`
+
+```{r}
+mean_and_sd(HeartDisease_df$age)
+```
+
+`gender`
+
+```{r}
+summary(as.factor(HeartDisease_df$gender))
+```
+
+`complications`
+
+```{r}
+summary(as.factor(HeartDisease_df$complications))
+```
+
+## Question 2
+
+```{r}
+total_plot =
+  HeartDisease_df %>% 
+  ggplot(aes(x = totalcost)) +
+  geom_density() +
+  labs(title = "pdf of total cost")
+```
+
+```{r}
+log_plot = 
+  HeartDisease_df %>% 
+  ggplot(aes(x = log(totalcost))) +
+  geom_density() +
+  labs(title = "pdf of log(total cost)")
+```
+
+```{r}
+sqrt_plot = 
+  HeartDisease_df %>% 
+  ggplot(aes(x = sqrt(totalcost))) +
+  geom_density() +
+  labs(title = "pdf of square root of total cost")
+```
+
+```{r}
+square_plot = 
+  HeartDisease_df %>% 
+  ggplot(aes(x = totalcost^2)) +
+  geom_density() +
+  labs(title = "pdf of total cost square")
+```
+
+```{r}
+(total_plot + square_plot)/(log_plot + sqrt_plot)
+```
+
+Above are distribution of total cost, log(totalcost), suqre root of totalcost and totalcost square. We can find that apply log to total cost is the best transformations.
+
+## Question 3
+
+```{r}
+HeartDisease_df =
+  HeartDisease_df %>% 
+  mutate(comp_bin = ifelse(complications == 0, 0, 1))
+
+head(HeartDisease_df)
+```
+
+## Question 4
+
+```{r}
+HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  ggplot(aes(x = log_totalcost, y = ERvisits)) +
+  geom_point() +
+  geom_smooth(method = 'lm',formula = y~x)
+```
+
+```{r}
+reg_Heart = 
+  HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  filter(is.finite(log_totalcost)) %>% 
+  lm(formula = ERvisits ~ log_totalcost, data = .)
+
+reg_Heart
+```
+
+```{r}
+summary(reg_Heart)
+```
+
+According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 and p-value is lower than 2.2e-16, so this is not a proper model to describe data and we should use other model.
+
+Interpretation: The slop of model is 0.452 which means if the log of total cost increases by 1 unit, the number of emergency room vistis will increase 0.452 times.
+
+## Question 5
+
+# Problem 3
+
+First, we import data
+
+```{r}
+PatSatisfaction_df = readxl::read_xlsx("./data/PatSatisfaction.xlsx") %>% 
+  janitor::clean_names() %>% 
+  reshape::rename(c(safisfaction = "satisfaction"))
+
+head(PatSatisfaction_df)
+```
+
+## Question 1
+
+```{r}
+reg_pat = 
+  PatSatisfaction_df %>%
+  lm(satisfaction ~ age + severity + anxiety, data = .)
+
+summary(reg_pat)
+```
+
+```{r}
+head(model.matrix(reg_pat))
+```
+
+
+## Question 2
+
+Assuming the model is 
+$$ Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_3 $$
+Among which, $X_1$ represents `age`,  $X_2$ represents `severity`,  $X_3$ represents `anxiety`.
+
+Hypotheses
+
+
