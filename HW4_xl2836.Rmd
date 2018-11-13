@@ -123,7 +123,8 @@ Above are distribution of total cost, log(totalcost), suqre root of totalcost an
 ```{r}
 HeartDisease_df =
   HeartDisease_df %>% 
-  mutate(comp_bin = ifelse(complications == 0, 0, 1))
+  mutate(comp_bin = ifelse(complications == 0, 0, 1)) %>% 
+  mutate(totalcost = ifelse(totalcost == 0, 0.001, totalcost))
 
 head(HeartDisease_df)
 ```
@@ -142,10 +143,8 @@ HeartDisease_df %>%
 reg_Heart = 
   HeartDisease_df %>% 
   mutate(log_totalcost = log(totalcost)) %>% 
-  filter(is.finite(log_totalcost)) %>% 
+  #filter(is.finite(log_totalcost)) %>% 
   lm(formula = log_totalcost ~ ERvisits, data = .) 
-
-reg_Heart
 
 reg_Heart %>% 
   broom::tidy()
@@ -153,17 +152,9 @@ reg_Heart %>%
 summary(reg_Heart)
 ```
 
-```{r}
-  HeartDisease_df %>% 
-  mutate(log_totalcost = log(totalcost)) %>% 
-  filter(is.finite(log_totalcost)) %>% 
-  lm(formula = log_totalcost ~ ERvisits, data = .) %>% 
-  broom::tidy()
-```
+According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 and means this simple linear model is not a proper model. However, p-value is lower than 2.2e-16, which means the slope is significant and there are positive relationship between log of total cost and number of emergency room visits.
 
-According to the results, we can find that adjusted R-squared is 0.1014 which is very closed to 0 which means this simple linear model is not a proper model. However, p-value is lower than 2.2e-16, which means the slope is significant and there are positive relationship between log of total cost and number of emergency room visits.
-
-Interpretation: The slop of model is 0.452 which means if the log of total cost increases by 1 unit, the number of emergency room vistis will increase 0.452 times.
+Interpretation: The slop of model is 0.227 which means if the number of emergency room vistis increases by 1 unit, the log of total cost will increase 0.452 units.
 
 ## Question 5
 
@@ -173,17 +164,83 @@ Test if `comp_bin` is an effect modifier
 reg_modifier_Heart = 
   HeartDisease_df %>% 
   mutate(log_totalcost = log(totalcost)) %>% 
-  filter(is.finite(log_totalcost)) %>% 
+  #filter(is.finite(log_totalcost)) %>% 
   lm(formula = log_totalcost ~ ERvisits + comp_bin + ERvisits*comp_bin, data = .) 
 
 reg_modifier_Heart %>% 
   broom::tidy()
 
-reg_modifier_Heart
-
 summary(reg_modifier_Heart)
 ```
 
+Since the corresponding p-value of 'ERvisits*comp_bin' is 0.357 which is bigger than 0.05, we can conclude that there is no interaction between `ERvisits` and `comp_bin` and `comp_bin` is not a modifier.
+
+Test if `comp_bin` is a confunder.
+
+```{r}
+reg_confounder_Heart = 
+  HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  #filter(is.finite(log_totalcost)) %>% 
+  lm(formula = log_totalcost ~ ERvisits + comp_bin, data = .) 
+
+reg_confounder_Heart %>% 
+  broom::tidy()
+
+summary(reg_confounder_Heart)
+```
+
+When adding `comp_bin` in model the association between `log_totalcost` and `ERvisits` becomes smaller but still significant and the regression coefficient decreased by 10.2%, so `comp_bin` is a confounder.
+
+Since `comp_bin` is a confounder but not a modifier, we use 'Partial' F-test to test whether we should include `comp_bin` as a factor.
+
+Model 1: $Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \varepsilon_i$
+
+Model 2: $Y_i = \beta_0 + \beta_1X_{i1} + \varepsilon_i$
+
+Among which, $X_1$ represents `ER_visits`,  $X_2$ represents `comp_bin`.
+
+Null hypothesis $H_O: \beta_2 = 0$, alternative hypothesis $H_1: \beta_2 \neq 0$
+
+```{r}
+anova(reg_confounder_Heart, reg_Heart) %>% 
+  broom::tidy()
+```
+
+According to results, p-value is smaller than 0.01 so we reject $H_0$ and conclude that Model 1 is 'superior'.As a resuit, we should include `comp_bin`.
+
+## Question 6
+
+```{r}
+reg_added_Heart = 
+  HeartDisease_df %>% 
+  mutate(log_totalcost = log(totalcost)) %>% 
+  #filter(is.finite(log_totalcost)) %>% 
+  lm(formula = log_totalcost ~ ERvisits + comp_bin + age + gender + duration, data = .) 
+
+reg_added_Heart %>% 
+  broom::tidy()
+
+summary(reg_added_Heart)
+```
+
+According to results, we can find all p-value of covariates are smaller than 0.01, so all covariates have significant influence in total cost.
+
+We use 'Partial' F-test to compare SLR and MLR models.
+
+Model 1: $Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \beta_3X_{i3} + \beta_4X_{i4} + \beta_5X_{i5} + \varepsilon_i$
+
+Model 2: $Y_i = \beta_0 + \beta_1X_{i1} + \varepsilon_i$
+
+Among which, $X_1$ represents `ERvisits`,  $X_2$ represents `comp_bin`,  $X_3$ represents `age`, $X_4$ represents `gender`, $X_5$ represents `duration`.
+
+Null hypothesis $H_O: \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0$, alternative hypothesis $H_1:$ at least one of $\beta$ is not zero.
+
+```{r}
+anova(reg_Heart, reg_added_Heart) %>% broom::tidy()
+```
+
+According to the ANOVA results, p-value is smaller than 0.01 so we reject $H_0$ and conclude that Model 1 is 'superior'.As a resuit, we should use MLR model.
 
 # Problem 3
 
@@ -200,24 +257,45 @@ head(PatSatisfaction_df)
 ## Question 1
 
 ```{r}
-reg_pat = 
-  PatSatisfaction_df %>%
-  lm(satisfaction ~ age + severity + anxiety, data = .)
-
-summary(reg_pat)
+PatSatisfaction_df %>% 
+  cor()
 ```
 
-```{r}
-head(model.matrix(reg_pat))
-```
-
+According to the correlation matrix, we can find that all `age`, `severity`, `anxirty` have negative relationship with satisfaction and the relationship between `age` and `satisfaction` is stronger than `severity` and `anxiety` 
 
 ## Question 2
 
 Assuming the model is 
-$$ Y = \beta_0 + \beta_1X_1 + \beta_2X_2 + \beta_3X_3 $$
+$$ Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \beta_3X_{i3} + \varepsilon_i $$
 Among which, $X_1$ represents `age`,  $X_2$ represents `severity`,  $X_3$ represents `anxiety`.
 
-Hypotheses
+Null hypothesis $H_0 : \beta_0 = \beta_1 = \beta_2 = \beta_3 =0$, alternative hypothesis $H_1 :$ at least one $\beta$ is not zero.
 
+```{r}
+reg_all = 
+  PatSatisfaction_df %>%
+  lm(satisfaction ~ age + severity + anxiety, data = .)
 
+summary(reg_all)
+anova(reg_all)
+```
+
+## Question 5
+
+Model 1: $Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \beta_3X_{i3} + \varepsilon_i$
+
+Model 2: $Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \varepsilon_i$
+
+Among which, $X_1$ represents `age`,  $X_2$ represents `severity`,  $X_3$ represents `anxiety`.
+
+We use 'Partial' F-test for nested models. Null hypothesis $H_O: \beta_3 = 0$, alternative hypothesis $H_1: \beta_3 \neq 0$
+
+```{r}
+reg_without_anxiety = 
+  PatSatisfaction_df %>%
+  lm(satisfaction ~ age + severity, data = .)
+
+anova(reg_all, reg_without_anxiety)
+```
+
+According to the ANOVA results, p-value is 0.0647 which is larger than 0.05, so we fail to reject $H_0$ and conclude that Model 1 is not 'superior` and we should use Model 2.
