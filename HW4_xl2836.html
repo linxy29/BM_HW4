@@ -130,10 +130,39 @@ $(document).ready(function () {
 
 <div id="problem-1" class="section level1">
 <h1>Problem 1</h1>
+<div id="question-1" class="section level2">
+<h2>Question 1</h2>
+<p><span class="math display">\[b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2} \]</span></p>
+<p><span class="math display">\[b_0 = \hat{Y} - b_1 \bar{x} \]</span> Since</p>
+<p><span class="math display">\[ \sum x_iY_i - n\bar{Y}\bar{x} = \sum x_iY_i-\bar{x}\sum Y_i = \sum(x_i-\bar{x})Y_i \]</span></p>
+<p>So, the expectation of <span class="math inline">\(b_1\)</span>’s numerator is</p>
+<p><span class="math display">\[
+\begin{split}
+E\{\sum (x_i-\bar{x})Y_i\} &amp; =\sum (x_i-\bar{x})E(Y_i)\\
+&amp; =\sum(x_i - \bar{x})(\beta_0+\beta_1x_i)\\
+&amp; =\beta_0\sum x_i-n\bar{x}\beta_0+\beta_1\sum{x_i}^2-n\bar{x}^2\beta_1\\
+&amp; =\beta_1(\sum{x_i^2}-n\bar{x}^2)
+\end{split} 
+\]</span></p>
+So
+<span class="math display">\[\begin{split}
+E(b_1) &amp;=\frac{E\{\sum{(x_i-\bar{x})Y_i}\}}{\sum{x_i^2}-n\bar{x}^2}\\
+&amp;=\frac{\beta_1(\sum{x_i^2}-n\bar{x}^2)}{\sum{x_i^2}-n\bar{x}^2}\\
+&amp;=\beta_1\\
+
+E(b_0) &amp;= E(\hat{Y}-b_1\bar{x})\\
+&amp;=\frac{1}{n}\sum{E(Y_i)}-E(b_1)\bar{x}\\
+&amp;=\frac{1}{n}\sum{[\beta_0+\beta_1x_1]}-\beta_1\bar{x}\\
+&amp;=\frac{1}{n}[n\beta_0+n\beta_1\bar{x}]-\beta_1\bar{x}\\
+&amp;=\beta_0
+\end{split}\]</span>
+<p>So <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_0\)</span> are unbiased estimators of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_0\)</span>.</p>
 </div>
-<div id="question-2" class="section level1">
-<h1>Question 2</h1>
-<p>As</p>
+<div id="question-2" class="section level2">
+<h2>Question 2</h2>
+<p>As <span class="math inline">\(\hat{\beta_0}=\bar{Y}-\hat{\beta_1}\)</span>, <span class="math inline">\(b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2}\)</span> and estimated regression model <span class="math inline">\(\hat{Y_i}=\hat{\beta_0}+\hat{\beta_1}x_i\)</span>,</p>
+<p>when <span class="math inline">\(x_i=\bar{x}\)</span>,</p>
+<p><span class="math display">\[\hat{Y_i}=\bar{Y}-\hat{\beta_1}\bar{x}+\hat{\beta_1}\bar{x}=\bar{Y}\]</span> so regression model always goes through the point <span class="math inline">\((\bar{x},\bar{y})\)</span>.</p>
 <pre class="r"><code>library(tidyverse)</code></pre>
 <pre><code>## ── Attaching packages ──────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
 <pre><code>## ✔ ggplot2 3.0.0     ✔ purrr   0.2.5
@@ -144,6 +173,7 @@ $(document).ready(function () {
 ## ✖ dplyr::filter() masks stats::filter()
 ## ✖ dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(patchwork)</code></pre>
+</div>
 </div>
 <div id="problem-2" class="section level1">
 <h1>Problem 2</h1>
@@ -173,7 +203,7 @@ $(document).ready(function () {
 ## 5     5    18727.    55      0             5     2        7             0
 ## 6     6      453.    66      0             1     0        3             0
 ## # ... with 2 more variables: comorbidities &lt;int&gt;, duration &lt;int&gt;</code></pre>
-<div id="question-1" class="section level2">
+<div id="question-1-1" class="section level2">
 <h2>Question 1</h2>
 <p>This dataset includes 788 observations and 10 variables. Among variables, main outcome is <code>totalcost</code> and main predictor is <code>ERvisits</code>.</p>
 <p>Then, we show descriptive statistics for all variables of interest.</p>
@@ -479,7 +509,7 @@ head(PatSatisfaction_df)</code></pre>
 ## 4           70    41       44     1.8
 ## 5           89    28       43     1.8
 ## 6           36    49       54     2.9</code></pre>
-<div id="question-1-1" class="section level2">
+<div id="question-1-2" class="section level2">
 <h2>Question 1</h2>
 <pre class="r"><code>PatSatisfaction_df %&gt;% 
   cor()</code></pre>
@@ -488,12 +518,16 @@ head(PatSatisfaction_df)</code></pre>
 ## age            -0.7867555  1.0000000  0.5679505  0.5696775
 ## severity       -0.6029417  0.5679505  1.0000000  0.6705287
 ## anxiety        -0.6445910  0.5696775  0.6705287  1.0000000</code></pre>
-<p>According to the correlation matrix, we can find that all <code>age</code>, <code>severity</code>, <code>anxirty</code> have negative relationship with satisfaction and the relationship between <code>age</code> and <code>satisfaction</code> is stronger than <code>severity</code> and <code>anxiety</code></p>
+<p>According to the correlation matrix, we can find that all <code>age</code>, <code>severity</code>, <code>anxirty</code> have negative relationship with satisfaction and the relationship between <code>age</code> and <code>satisfaction</code> is stronger than <code>severity</code> and <code>anxiety</code> .</p>
 </div>
 <div id="question-2-2" class="section level2">
 <h2>Question 2</h2>
 <p>Assuming the model is <span class="math display">\[ Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \beta_3X_{i3} + \varepsilon_i \]</span> Among which, <span class="math inline">\(X_1\)</span> represents <code>age</code>, <span class="math inline">\(X_2\)</span> represents <code>severity</code>, <span class="math inline">\(X_3\)</span> represents <code>anxiety</code>.</p>
 <p>Null hypothesis <span class="math inline">\(H_0 : \beta_0 = \beta_1 = \beta_2 = \beta_3 =0\)</span>, alternative hypothesis <span class="math inline">\(H_1 :\)</span> at least one <span class="math inline">\(\beta\)</span> is not zero.</p>
+<p>Decision rule:</p>
+<p>If <span class="math inline">\(F^* = \frac{MSR}{MSE} &gt; F(1-\alpha;p,n-p-1)\)</span>, reject <span class="math inline">\(H_0\)</span>,</p>
+<p>if <span class="math inline">\(F^* = \frac{MSR}{MSE} \leq F(1-\alpha;p,n-p-1)\)</span>, fail to reject <span class="math inline">\(H_0\)</span>.</p>
+<p>with a significance level of 0.05, <span class="math inline">\(\alpha = 0.05\)</span></p>
 <pre class="r"><code>reg_all = 
   PatSatisfaction_df %&gt;%
   lm(satisfaction ~ age + severity + anxiety, data = .)
@@ -519,17 +553,34 @@ summary(reg_all)</code></pre>
 ## Residual standard error: 10.06 on 42 degrees of freedom
 ## Multiple R-squared:  0.6822, Adjusted R-squared:  0.6595 
 ## F-statistic: 30.05 on 3 and 42 DF,  p-value: 1.542e-10</code></pre>
-<pre class="r"><code>anova(reg_all)</code></pre>
-<pre><code>## Analysis of Variance Table
-## 
-## Response: satisfaction
-##           Df Sum Sq Mean Sq F value    Pr(&gt;F)    
-## age        1 8275.4  8275.4 81.8026 2.059e-11 ***
-## severity   1  480.9   480.9  4.7539   0.03489 *  
-## anxiety    1  364.2   364.2  3.5997   0.06468 .  
-## Residuals 42 4248.8   101.2                      
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<p>According to results, we can find <span class="math inline">\(F^*\)</span> = 30.05 &gt; 2.8270487, so we reject <span class="math inline">\(H_0\)</span> and conclude that there is a regression relation.</p>
+</div>
+<div id="question-3-1" class="section level2">
+<h2>Question 3</h2>
+<pre class="r"><code>reg_all %&gt;% broom::tidy()</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   term        estimate std.error statistic  p.value
+##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 (Intercept)  158.       18.1       8.74  5.26e-11
+## 2 age           -1.14      0.215    -5.31  3.81e- 6
+## 3 severity      -0.442     0.492    -0.898 3.74e- 1
+## 4 anxiety      -13.5       7.10     -1.90  6.47e- 2</code></pre>
+<pre class="r"><code>confint(reg_all)</code></pre>
+<pre><code>##                  2.5 %      97.5 %
+## (Intercept) 121.911727 195.0707761
+## age          -1.575093  -0.7081303
+## severity     -1.434831   0.5508228
+## anxiety     -27.797859   0.8575324</code></pre>
+<p>By using function <code>confint</code>, we get 95% CIs of all estimators. The 95% CIs of <code>severity</code> is (-1.4348, 0.5508) which means at <span class="math inline">\(\alpha = 0.05\)</span> significant level, we can conclude that the true coefficient of <code>severity</code> is between -1.4348 and 0.5508. The estimated coefficient of <code>severity</code> is -0.442 which means if the value of <code>severity</code> increased by 1 units, the value of satisfaction will decrease 0.442 given all other values of predictors stay constant.</p>
+</div>
+<div id="question-4-1" class="section level2">
+<h2>Question 4</h2>
+<pre class="r"><code>list(age = 35, severity = 42, anxiety = 2.1) %&gt;% 
+  predict(object = reg_all, newdata = ., interval = &quot;predict&quot;)</code></pre>
+<pre><code>##        fit      lwr      upr
+## 1 71.68332 50.06237 93.30426</code></pre>
+<p>By using <code>predict</code> function, we can get the prediction interval for the new patient’s satisfaction is (50.0624, 93.3042).</p>
+<p>Interprest: We are 95% confident that the the new patient’s satisfaction fall within (50.0624, 93.3042) given <code>age</code> equals 35, <code>severity</code> equals 42 and <code>anxiety</code> equals 2.1</p>
 </div>
 <div id="question-5-1" class="section level2">
 <h2>Question 5</h2>
@@ -537,20 +588,24 @@ summary(reg_all)</code></pre>
 <p>Model 2: <span class="math inline">\(Y_i = \beta_0 + \beta_1X_{i1} + \beta_2X_{i2} + \varepsilon_i\)</span></p>
 <p>Among which, <span class="math inline">\(X_1\)</span> represents <code>age</code>, <span class="math inline">\(X_2\)</span> represents <code>severity</code>, <span class="math inline">\(X_3\)</span> represents <code>anxiety</code>.</p>
 <p>We use ‘Partial’ F-test for nested models. Null hypothesis <span class="math inline">\(H_O: \beta_3 = 0\)</span>, alternative hypothesis <span class="math inline">\(H_1: \beta_3 \neq 0\)</span></p>
+<p>Decision rule:</p>
+<p><span class="math display">\[ F^*=\frac{(SSR_L-SSR_S)/(df_L-df_S)}{\frac{SSE_L}{df_L}} \sim F_{df_L-df_S,dfL} \]</span></p>
+<p>where <span class="math inline">\(df_S = n-p_S-1, df_L = n-p_L-1\)</span>.</p>
+<p>If <span class="math inline">\(F^* &gt; F(1-\alpha;df_L-df_S,df_L)\)</span>, reject <span class="math inline">\(H_0\)</span>;</p>
+<p>If <span class="math inline">\(F^* \leq F(1-\alpha;df_L-df_S,df_L)\)</span>, fail to reject <span class="math inline">\(H_0\)</span>.</p>
+<p>With <span class="math inline">\(\alpha = 0.05\)</span>, when <span class="math inline">\(p-value \geq 0.05\)</span>, fail to reject <span class="math inline">\(H_0\)</span>, when <span class="math inline">\(p-value &lt; 0.05\)</span>, reject <span class="math inline">\(H_0\)</span>.</p>
 <pre class="r"><code>reg_without_anxiety = 
   PatSatisfaction_df %&gt;%
   lm(satisfaction ~ age + severity, data = .)
 
-anova(reg_all, reg_without_anxiety)</code></pre>
-<pre><code>## Analysis of Variance Table
-## 
-## Model 1: satisfaction ~ age + severity + anxiety
-## Model 2: satisfaction ~ age + severity
-##   Res.Df    RSS Df Sum of Sq      F  Pr(&gt;F)  
-## 1     42 4248.8                              
-## 2     43 4613.0 -1   -364.16 3.5997 0.06468 .
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+anova(reg_all, reg_without_anxiety) %&gt;% 
+  broom::tidy()</code></pre>
+<pre><code>## Warning: Unknown or uninitialised column: 'term'.</code></pre>
+<pre><code>## # A tibble: 2 x 6
+##   res.df   rss    df sumsq statistic p.value
+## *  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1     42 4249.    NA   NA      NA    NA     
+## 2     43 4613.    -1 -364.      3.60  0.0647</code></pre>
 <p>According to the ANOVA results, p-value is 0.0647 which is larger than 0.05, so we fail to reject <span class="math inline">\(H_0\)</span> and conclude that Model 1 is not ’superior` and we should use Model 2.</p>
 </div>
 </div>

@@ -6,9 +6,49 @@ output: html_document
 ---
 # Problem 1
 
-# Question 2
+## Question 1
 
-As 
+$$b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2} $$
+
+$$b_0 = \hat{Y} - b_1 \bar{x} $$
+Since
+
+$$ \sum x_iY_i - n\bar{Y}\bar{x} = \sum x_iY_i-\bar{x}\sum Y_i = \sum(x_i-\bar{x})Y_i $$
+
+So, the expectation of $b_1$'s numerator is
+
+$$
+\begin{split}
+E\{\sum (x_i-\bar{x})Y_i\} & =\sum (x_i-\bar{x})E(Y_i)\\
+& =\sum(x_i - \bar{x})(\beta_0+\beta_1x_i)\\
+& =\beta_0\sum x_i-n\bar{x}\beta_0+\beta_1\sum{x_i}^2-n\bar{x}^2\beta_1\\
+& =\beta_1(\sum{x_i^2}-n\bar{x}^2)
+\end{split} 
+$$
+
+So
+\begin{split}
+E(b_1) &=\frac{E\{\sum{(x_i-\bar{x})Y_i}\}}{\sum{x_i^2}-n\bar{x}^2}\\
+&=\frac{\beta_1(\sum{x_i^2}-n\bar{x}^2)}{\sum{x_i^2}-n\bar{x}^2}\\
+&=\beta_1\\
+
+E(b_0) &= E(\hat{Y}-b_1\bar{x})\\
+&=\frac{1}{n}\sum{E(Y_i)}-E(b_1)\bar{x}\\
+&=\frac{1}{n}\sum{[\beta_0+\beta_1x_1]}-\beta_1\bar{x}\\
+&=\frac{1}{n}[n\beta_0+n\beta_1\bar{x}]-\beta_1\bar{x}\\
+&=\beta_0
+\end{split}
+
+So $b_1$ and $b_0$ are unbiased estimators of $\beta_1$ and $\beta_0$.
+
+## Question 2
+
+As $\hat{\beta_0}=\bar{Y}-\hat{\beta_1}$, $b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2}$ and estimated regression model $\hat{Y_i}=\hat{\beta_0}+\hat{\beta_1}x_i$,
+
+when $x_i=\bar{x}$,
+
+$$\hat{Y_i}=\bar{Y}-\hat{\beta_1}\bar{x}+\hat{\beta_1}\bar{x}=\bar{Y}$$
+so regression model always goes through the point $(\bar{x},\bar{y})$.
 
 ```{r}
 library(tidyverse)
@@ -261,7 +301,7 @@ PatSatisfaction_df %>%
   cor()
 ```
 
-According to the correlation matrix, we can find that all `age`, `severity`, `anxirty` have negative relationship with satisfaction and the relationship between `age` and `satisfaction` is stronger than `severity` and `anxiety` 
+According to the correlation matrix, we can find that all `age`, `severity`, `anxirty` have negative relationship with satisfaction and the relationship between `age` and `satisfaction` is stronger than `severity` and `anxiety` .
 
 ## Question 2
 
@@ -271,14 +311,43 @@ Among which, $X_1$ represents `age`,  $X_2$ represents `severity`,  $X_3$ repres
 
 Null hypothesis $H_0 : \beta_0 = \beta_1 = \beta_2 = \beta_3 =0$, alternative hypothesis $H_1 :$ at least one $\beta$ is not zero.
 
+Decision rule:
+
+If $F^* = \frac{MSR}{MSE} > F(1-\alpha;p,n-p-1)$, reject $H_0$,
+
+if $F^* = \frac{MSR}{MSE} \leq F(1-\alpha;p,n-p-1)$, fail to reject $H_0$.
+
+with a significance level of 0.05, $\alpha = 0.05$
+
 ```{r}
 reg_all = 
   PatSatisfaction_df %>%
   lm(satisfaction ~ age + severity + anxiety, data = .)
 
 summary(reg_all)
-anova(reg_all)
 ```
+
+According to results, we can find $F^*$ = 30.05 > `r qf(0.95,3,42)`, so we reject $H_0$ and conclude that there is a regression relation. 
+
+## Question 3
+
+```{r}
+reg_all %>% broom::tidy()
+confint(reg_all)
+```
+
+By using function `confint`, we get 95% CIs of all estimators. The 95% CIs of `severity` is (-1.4348, 0.5508) which means at $\alpha = 0.05$ significant level, we can conclude that the true coefficient of `severity` is between -1.4348 and 0.5508. The estimated coefficient of `severity` is -0.442 which means if the value of `severity` increased by 1 units, the value of satisfaction will decrease 0.442 given all other values of predictors stay constant.
+
+## Question 4
+
+```{r}
+list(age = 35, severity = 42, anxiety = 2.1) %>% 
+  predict(object = reg_all, newdata = ., interval = "predict")
+``` 
+
+By using `predict` function, we can get the prediction interval for the new patient's satisfaction is (50.0624, 93.3042).
+
+Interprest: We are 95% confident that the the new patient's satisfaction fall within (50.0624, 93.3042) given `age` equals 35, `severity` equals 42 and `anxiety` equals 2.1
 
 ## Question 5
 
@@ -290,12 +359,25 @@ Among which, $X_1$ represents `age`,  $X_2$ represents `severity`,  $X_3$ repres
 
 We use 'Partial' F-test for nested models. Null hypothesis $H_O: \beta_3 = 0$, alternative hypothesis $H_1: \beta_3 \neq 0$
 
+Decision rule:
+
+$$ F^*=\frac{(SSR_L-SSR_S)/(df_L-df_S)}{\frac{SSE_L}{df_L}} \sim F_{df_L-df_S,dfL} $$ 
+
+where $df_S = n-p_S-1, df_L = n-p_L-1$.
+
+If $F^* > F(1-\alpha;df_L-df_S,df_L)$, reject $H_0$;
+
+If $F^* \leq F(1-\alpha;df_L-df_S,df_L)$, fail to reject $H_0$.
+
+With $\alpha = 0.05$, when $p-value \geq 0.05$, fail to reject $H_0$, when $p-value < 0.05$, reject $H_0$.
+
 ```{r}
 reg_without_anxiety = 
   PatSatisfaction_df %>%
   lm(satisfaction ~ age + severity, data = .)
 
-anova(reg_all, reg_without_anxiety)
+anova(reg_all, reg_without_anxiety) %>% 
+  broom::tidy()
 ```
 
 According to the ANOVA results, p-value is 0.0647 which is larger than 0.05, so we fail to reject $H_0$ and conclude that Model 1 is not 'superior` and we should use Model 2.
