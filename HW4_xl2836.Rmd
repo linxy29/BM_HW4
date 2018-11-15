@@ -2,15 +2,18 @@
 title: "Homework 4"
 author: "Xinyi Lin"
 date: "11/9/2018"
-output: github_document
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
 ---
 # Problem 1
 
 ## Question 1
 
-$$b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2} $$
+$$ b_1 = \frac{n\sum x_iY_i-\sum x_i\sum Y_i}{n\sum x^2_i-(\sum x_i)^2} = \frac{\sum x_iY_i-n\hat{Y}\bar{x}}{\sum x_i^2 - n\bar{x}^2} $$
 
-$$b_0 = \hat{Y} - b_1 \bar{x} $$
+$$ b_0 = \hat{Y} - b_1 \bar{x} $$
 Since
 
 $$ \sum x_iY_i - n\bar{Y}\bar{x} = \sum x_iY_i-\bar{x}\sum Y_i = \sum(x_i-\bar{x})Y_i $$
@@ -50,7 +53,7 @@ when $x_i=\bar{x}$,
 $$\hat{Y_i}=\bar{Y}-\hat{\beta_1}\bar{x}+\hat{\beta_1}\bar{x}=\bar{Y}$$
 so regression model always goes through the point $(\bar{x},\bar{y})$.
 
-```{r}
+```{r, message = FALSE}
 library(tidyverse)
 library(patchwork)
 ```
@@ -336,7 +339,7 @@ reg_all %>% broom::tidy()
 confint(reg_all)
 ```
 
-By using function `confint`, we get 95% CIs of all estimators. The 95% CIs of `severity` is (-1.4348, 0.5508) which means at $\alpha = 0.05$ significant level, we can conclude that the true coefficient of `severity` is between -1.4348 and 0.5508. The estimated coefficient of `severity` is -0.442 which means if the value of `severity` increased by 1 units, the value of satisfaction will decrease 0.442 given all other values of predictors stay constant.
+By using function `confint`, we get 95% CIs of all estimators. The 95% CIs of `severity` is (-1.4348, 0.5508) which means at $\alpha = 0.05$ significant level, we can conclude that the mean value of satisfaction changes somewhere between decreasing 1.4348 and increasing 0.5508 for each additional unit of the severity of the illness given all other values of predictors stay constant. The estimated coefficient of `severity` is -0.442 which means if the value of `severity` increased by 1 units, the mean value of satisfaction will decrease 0.442 given all other values of predictors stay constant.
 
 ## Question 4
 
