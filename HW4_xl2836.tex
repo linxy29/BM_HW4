@@ -138,7 +138,7 @@
 
 \[ \sum x_iY_i - n\bar{Y}\bar{x} = \sum x_iY_i-\bar{x}\sum Y_i = \sum(x_i-\bar{x})Y_i \]
 
-So, the expectation of \(b_1\)'s numerator is
+The expectation of \(b_1\)'s numerator is
 
 \[
 \begin{split}
@@ -148,8 +148,6 @@ E\{\sum (x_i-\bar{x})Y_i\} & =\sum (x_i-\bar{x})E(Y_i)\\
 & =\beta_1(\sum{x_i^2}-n\bar{x}^2)
 \end{split} 
 \]
-
-So
 
 \begin{split}
 E(b_1) &=\frac{E\{\sum{(x_i-\bar{x})Y_i}\}}{\sum{x_i^2}-n\bar{x}^2}\\
@@ -177,6 +175,37 @@ when \(x_i=\bar{x}\),
 
 \[\hat{Y_i}=\bar{Y}-\hat{\beta_1}\bar{x}+\hat{\beta_1}\bar{x}=\bar{Y}\]
 so regression model always goes through the point \((\bar{x},\bar{y})\).
+
+\subsection{Question 3}\label{question-3}
+
+The regression model is:
+
+\[ Yi \sim N(\beta_0 + \beta_1x_i, \sigma^2), i=1, 2, ..., n \]
+
+the likelihood of the linear model becomes:
+
+\[ L(\beta_0, \beta, \sigma^2) = \prod_{i=1}^n\frac{1}{\sqrt{2x\sigma}}exp(-\frac{(Y_i-\beta_0-\beta_1x_i)^2}{2\sigma^2}) \]
+
+the log-likelihood function:
+
+\[ lnL(\beta_0, \beta_1, \sigma^2) = log[\prod_{i=1}^n\frac{1}{\sqrt{2x\sigma}}exp(-\frac{(Y_i-\beta_0-\beta_1x_i)^2}{2\sigma^2})] = -\frac{n}{2}log(2\pi)-nlog(\sigma)-\sum_{i=1}^n\frac{(Y_i -\beta_0-\beta_1x_i)^2}{2\sigma^2} \]
+
+to find \(\sigma\), we let
+
+\[ \frac{\partial{lnL(\beta_0, \beta_1, \sigma^2)}}{\partial{\sigma}}= -\frac{n}{\sigma}+\frac{1}{\sigma^3}\sum_{i=1}^n(Y_i-\beta_0-\beta_1x_i)^2=0 \]
+
+\[ \sigma^2 = \frac{1}{n}\sum_{i=1}^n(Y_i-\beta_0-\beta_1x_i)^2 \]
+
+so estimator of \(\sigma^2\)
+
+\[  \hat{\sigma^2} = \frac{1}{n}\sum_{i=1}^n(\hat{Y_i}-\hat{\beta_0}-\hat{\beta_1}x_i)^2 = \frac{1}{n}\sum_{i=1}^n(Y_i-\hat{Y_i})^2 = \frac{1}{n}SSE\]
+
+\[ E(\hat{\sigma^2}) = E(\frac{1}{n}\sum_{i=1}^n(Y_i-\hat{Y})^2) = E(\frac{1}{n}SSE) = E(\frac{n-2}{n}\frac{SSE}{n-2}) = \frac{n-2}{n}E(\frac{SSE}{n-2}) = \frac{n-2}{n}\sigma^2 \]
+
+since\(E(\hat{\sigma^2}) \neq \sigma^2\), \(\hat{\sigma^2}\) is biased
+estimator of \(\sigma^2\), while
+\(E(s^2) = E(\hat{\frac{SSE}{n-2}}) = \sigma^2\), \(s^2\) is unbiased
+estimator of \(\sigma^2\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -233,8 +262,9 @@ First, we need to import data
 \subsection{Question 1}\label{question-1-1}
 
 This dataset includes 788 observations and 10 variables. Among
-variables, main outcome is \texttt{totalcost} and main predictor is
-\texttt{ERvisits}.
+variables, main outcome is \texttt{totalcost}, main predictor is
+\texttt{ERvisits} and other important covariates including \texttt{age},
+\texttt{gender} and \texttt{duration}.
 
 Then, we show descriptive statistics for all variables of interest.
 
@@ -389,7 +419,7 @@ Above are distribution of total cost, log(totalcost), suqre root of
 totalcost and totalcost square. We can find that apply log to total cost
 is the best transformations.
 
-\subsection{Question 3}\label{question-3}
+\subsection{Question 3}\label{question-3-1}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -480,9 +510,9 @@ is the best transformations.
 
 According to the results, we can find that adjusted R-squared is 0.1014
 which is very closed to 0 and means this simple linear model is not a
-proper model. However, p-value is lower than 2.2e-16, which means the
-slope is significant and there are positive relationship between log of
-total cost and number of emergency room visits.
+proper model. However, p-value of slope is lower than 2.2e-16, which
+means the slope is significant and there are positive relationship
+between log of total cost and number of emergency room visits.
 
 Interpretation: The slop of model is 0.227 which means if the number of
 emergency room vistis increases by 1 unit, the log of total cost will
@@ -622,6 +652,19 @@ Among which, \(X_1\) represents \texttt{ER\_visits}, \(X_2\) represents
 Null hypothesis \(H_O: \beta_2 = 0\), alternative hypothesis
 \(H_1: \beta_2 \neq 0\)
 
+Decision rule:
+
+\[ F^*=\frac{(SSR_L-SSR_S)/(df_L-df_S)}{\frac{SSE_L}{df_L}} \sim F_{df_L-df_S,dfL} \]
+
+where \(df_S = n-p_S-1, df_L = n-p_L-1\).
+
+If \(F^* > F(1-\alpha;df_L-df_S,df_L)\), reject \(H_0\);
+
+If \(F^* \leq F(1-\alpha;df_L-df_S,df_L)\), fail to reject \(H_0\).
+
+With \(\alpha = 0.05\), when \(p-value \geq 0.05\), fail to reject
+\(H_0\), when \(p-value < 0.05\), reject \(H_0\).
+
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{anova}\NormalTok{(reg_confounder_Heart, reg_Heart) }\OperatorTok{%>%}\StringTok{ }
@@ -643,7 +686,8 @@ Null hypothesis \(H_O: \beta_2 = 0\), alternative hypothesis
 
 According to results, p-value is smaller than 0.01 so we reject \(H_0\)
 and conclude that Model 1 is `superior'.As a resuit, we should include
-\texttt{comp\_bin}.
+\texttt{comp\_bin} should be added in the model and model 1 is
+`superior'.
 
 \subsection{Question 6}\label{question-6}
 
@@ -720,6 +764,19 @@ Among which, \(X_1\) represents \texttt{ERvisits}, \(X_2\) represents
 
 Null hypothesis \(H_O: \beta_2 = \beta_3 = \beta_4 = \beta_5 = 0\),
 alternative hypothesis \(H_1:\) at least one of \(\beta\) is not zero.
+
+Decision rule:
+
+\[ F^*=\frac{(SSR_L-SSR_S)/(df_L-df_S)}{\frac{SSE_L}{df_L}} \sim F_{df_L-df_S,dfL} \]
+
+where \(df_S = n-p_S-1, df_L = n-p_L-1\).
+
+If \(F^* > F(1-\alpha;df_L-df_S,df_L)\), reject \(H_0\);
+
+If \(F^* \leq F(1-\alpha;df_L-df_S,df_L)\), fail to reject \(H_0\).
+
+With \(\alpha = 0.05\), when \(p-value \geq 0.05\), fail to reject
+\(H_0\), when \(p-value < 0.05\), reject \(H_0\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -799,8 +856,8 @@ Assuming the model is
 Among which, \(X_1\) represents \texttt{age}, \(X_2\) represents
 \texttt{severity}, \(X_3\) represents \texttt{anxiety}.
 
-Null hypothesis \(H_0 : \beta_0 = \beta_1 = \beta_2 = \beta_3 =0\),
-alternative hypothesis \(H_1 :\) at least one \(\beta\) is not zero.
+Null hypothesis \(H_0 : \beta_1 = \beta_2 = \beta_3 =0\), alternative
+hypothesis \(H_1 :\) at least one \(\beta\) is not zero.
 
 Decision rule:
 
@@ -848,7 +905,7 @@ According to results, we can find \(F^*\) = 30.05 \textgreater{}
 2.8270487, so we reject \(H_0\) and conclude that there is a regression
 relation.
 
-\subsection{Question 3}\label{question-3-1}
+\subsection{Question 3}\label{question-3-2}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -885,9 +942,10 @@ The 95\% CIs of \texttt{severity} is (-1.4348, 0.5508) which means at
 \(\alpha = 0.05\) significant level, we can conclude that the mean value
 of satisfaction changes somewhere between decreasing 1.4348 and
 increasing 0.5508 for each additional unit of the severity of the
-illness given all other values of predictors stay constant. The
-estimated coefficient of \texttt{severity} is -0.442 which means if the
-value of \texttt{severity} increased by 1 units, the mean value of
+illness given all other values of predictors stay constant.
+
+The estimated coefficient of \texttt{severity} is -0.442 which means if
+the value of \texttt{severity} increased by 1 units, the mean value of
 satisfaction will decrease 0.442 given all other values of predictors
 stay constant.
 
